@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Trader Command Center 🇮🇳</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #0f172a;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --warning: #ca8a04; /* From new code */
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode {
+            --primary: #6366f1;
+            --primary-dark: #818cf8;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f1f5f9;
+            --text-light: #94a3b8;
+            --border: #334155;
+            --success-light: #064e3b; 
+            --danger-light: #450a0a; 
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--card);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        /* --- Header & Dark Toggle --- */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .theme-toggle:hover { background: var(--border); }
+
+        /* --- Navigation Tabs --- */
+        .nav-tabs {
+            display: flex;
+            background: var(--card);
+            padding: 0 10px;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 16px;
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+        }
+
+        .nav-btn:hover { color: var(--primary); background: rgba(99, 102, 241, 0.05); }
+
+        .nav-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        /* --- Content Area --- */
+        .tab-content { display: none; padding: 30px; animation: slideUp 0.4s; }
+        .tab-content.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Grid & Inputs --- */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+
+        .section-header { margin-bottom: 25px; display: flex; align-items: center; gap: 10px; justify-content: space-between; }
+        .section-title { font-size: 1.4rem; font-weight: 800; color: var(--text); margin: 0; }
+        .badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 20px; font-weight: 700; text-transform: uppercase; }
+        .badge-pro { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; color: var(--text-light); }
+        
+        input, select {
+            width: 100%; padding: 12px 15px; border: 1px solid var(--border); border-radius: var(--radius);
+            font-size: 1rem; box-sizing: border-box; transition: all 0.2s; background: var(--card); color: var(--text);
+        }
+        input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+
+        /* --- Interactive Elements --- */
+        .input-group { display: flex; align-items: stretch; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+        .input-group input { border: none; text-align: center; border-radius: 0; }
+        .tick-btn {
+            padding: 0 16px; background: var(--bg); border: none; cursor: pointer; font-weight: bold;
+            color: var(--text-light); display: flex; align-items: center; justify-content: center;
+            border-right: 1px solid var(--border);
+        }
+        .tick-btn:last-child { border-right: none; border-left: 1px solid var(--border); }
+        .tick-btn:hover { background: var(--border); color: var(--primary); }
+
+        .btn-calc {
+            width: 100%; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white; border: none; padding: 16px; border-radius: var(--radius); font-size: 1.1rem;
+            font-weight: 700; cursor: pointer; margin-top: 25px; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-calc:hover { transform: translateY(-1px); opacity: 0.9; }
+
+        .helper-chips { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+        .chip {
+            font-size: 0.75rem; padding: 4px 10px; background: var(--bg); border-radius: 12px; cursor: pointer; 
+            border: 1px solid var(--border); color: var(--text-light);
+        }
+        .chip:hover { border-color: var(--primary); color: var(--primary); }
+
+        .radio-group { display: flex; gap: 5px; background: var(--bg); padding: 5px; border-radius: var(--radius); }
+        .radio-group label { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-radius: 8px; margin: 0; color: var(--text-light); transition: 0.2s; font-size: 0.9rem;}
+        .radio-group input { display: none; }
+        .radio-group input:checked + label { background: var(--card); color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-weight: 700; }
+
+        /* --- Results --- */
+        .results-area { margin-top: 30px; padding-top: 30px; border-top: 2px dashed var(--border); display: none; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .card { padding: 20px 15px; border-radius: 16px; background: var(--card); border: 1px solid var(--border); text-align: center; }
+        
+        .card.profit { background: var(--success-light); border-color: var(--success); }
+        .card.loss { background: var(--danger-light); border-color: var(--danger); }
+        
+        .val-big { font-size: 1.5rem; font-weight: 800; margin: 5px 0; color: var(--text); }
+        .val-sub { font-size: 0.75rem; font-weight: 700; opacity: 0.8; text-transform: uppercase; color: var(--text-light); }
+        
+        .profit .val-big { color: #15803d; } .dark-mode .profit .val-big { color: #4ade80; }
+        .loss .val-big { color: #b91c1c; } .dark-mode .loss .val-big { color: #f87171; }
+
+        .breakdown-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.9rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+        .breakdown-table td { padding: 12px 20px; border-bottom: 1px solid var(--border); color: var(--text); }
+        .text-right { text-align: right; font-family: 'Roboto Mono', monospace; }
+        .text-danger { color: var(--danger); }
+        .row-highlight { background: var(--bg); font-weight: 600; }
+
+        /* --- Toggle Switch --- */
+        .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; margin-right: 10px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(20px); }
+        .flex-row { display: flex; align-items: center; }
+
+        .pro-input-container { background: rgba(14, 165, 233, 0.1); border: 1px dashed #0ea5e9; padding: 15px; border-radius: 12px; margin-bottom: 20px; }
+        .pro-label { color: #0369a1; font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; display: block; }
+        .dark-mode .pro-label { color: #38bdf8; }
+        
+        .toast {
+            position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--card);
+            padding: 10px 20px; border-radius: 30px; font-size: 0.9rem; opacity: 0; transition: opacity 0.3s;
+            pointer-events: none; z-index: 100;
+        }
+        
+        .mode-toggle-text { font-size:0.8em; color:var(--primary); cursor:pointer; font-weight:600; }
+        
+        .action-btns { display: flex; gap: 10px; margin-top: 15px; }
+        .action-btn-secondary {
+            flex: 1; padding: 10px; background: transparent; border: 1px solid var(--border); color: var(--text-light);
+            border-radius: var(--radius); cursor: pointer; font-size: 0.85rem; font-weight: 600;
+        }
+        .action-btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+        
+        /* New Styles for Intraday Details Tab */
+        .mode-tabs { display: flex; background: var(--bg); padding: 5px; border-radius: 10px; margin-bottom: 25px; }
+        .mode-tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-radius: 8px; font-weight: 600; transition: all 0.2s; color: var(--text-light); }
+        .mode-tab.active { background: var(--card); color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input.risk-input { border-color: var(--warning); background-color: #fffbeb; }
+        input.risk-input:focus { border-color: var(--warning); box-shadow: 0 0 0 3px rgba(202, 138, 4, 0.1); }
+        
+        @media print {
+            .nav-tabs, .btn-calc, .theme-toggle, .helper-chips, .toast, .action-btns { display: none !important; }
+            .container { box-shadow: none; border: none; max-width: 100%; }
+            body { background: white; color: black; }
+        }
+        
+        @media (max-width: 600px) { .nav-btn { font-size: 0.8rem; padding: 15px 5px; } .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="top-bar">
+        <div style="font-weight:800; color:var(--primary); font-size:1.1rem;">FinTools Pro 🚀</div>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <span id="theme-icon">🌙</span> Dark Mode
+        </button>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-tabs">
+        <button class="nav-btn active" onclick="switchTab('intraday')">Intraday</button>
+        <button class="nav-btn" onclick="switchTab('intraday-details')">Intraday Details</button>
+        <button class="nav-btn" onclick="switchTab('options')">F&O Options</button>
+        <button class="nav-btn" onclick="switchTab('mutualfunds')">Mutual Funds</button>
+        <button class="nav-btn" onclick="switchTab('tools')">Tools 🛠️</button>
+    </div>
+
+    <!-- TAB 1: INTRADAY EQUITY (Legacy) -->
+    <div id="tab-intraday" class="tab-content active">
+        <div class="section-header">
+            <h2 class="section-title">Intraday Equity</h2>
+            <span class="badge badge-pro">High Risk</span>
+        </div>
+        <div class="grid">
+            <div>
+                <div class="form-group">
+                    <label>Broker Platform</label>
+                    <select id="intra_broker" onchange="saveState()">
+                        <option value="zerodha">Zerodha (Max ₹20 or 0.03%)</option>
+                        <option value="groww">Groww / Dhan (Flat ₹20)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Available Capital (₹)</label>
+                    <input type="number" id="intra_capital" value="10000" placeholder="e.g. 50000" onchange="saveState()">
+                </div>
+                <div class="form-group">
+                    <label>Leverage</label>
+                    <select id="intra_leverage" onchange="saveState()">
+                        <option value="5">5x (Standard Intraday)</option>
+                        <option value="1">1x (Delivery)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Direction</label>
+                    <div class="radio-group">
+                        <input type="radio" name="intra_dir" id="i_long" value="LONG" checked><label for="i_long">Buy</label>
+                        <input type="radio" name="intra_dir" id="i_short" value="SHORT"><label for="i_short">Sell</label>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="form-group">
+                    <label>Entry Price (₹)</label>
+                    <div class="input-group">
+                        <div class="tick-btn" onclick="tick('intra_entry', -0.05)">-</div>
+                        <input type="number" id="intra_entry" value="500">
+                        <div class="tick-btn" onclick="tick('intra_entry', 0.05)">+</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label style="display:flex; justify-content:space-between;">
+                        Target
+                        <span class="mode-toggle-text" onclick="toggleInputMode('intra_target_mode')">Toggle: <span id="intra_target_mode_text">%</span></span>
+                    </label>
+                    <div class="input-group">
+                        <div class="tick-btn" onclick="tick('intra_target', -0.1)">-</div>
+                        <input type="number" id="intra_target" value="1.0">
+                        <div class="tick-btn" onclick="tick('intra_target', 0.1)">+</div>
+                    </div>
+                    <input type="hidden" id="intra_target_mode" value="PERCENT">
+                </div>
+                <div class="form-group">
+                    <label style="display:flex; justify-content:space-between;">
+                        Stop Loss
+                        <span class="mode-toggle-text" onclick="toggleInputMode('intra_sl_mode')">Toggle: <span id="intra_sl_mode_text">%</span></span>
+                    </label>
+                    <div class="input-group">
+                        <div class="tick-btn" onclick="tick('intra_sl', -0.1)">-</div>
+                        <input type="number" id="intra_sl" value="0.5">
+                        <div class="tick-btn" onclick="tick('intra_sl', 0.1)">+</div>
+                    </div>
+                    <input type="hidden" id="intra_sl_mode" value="PERCENT">
+                </div>
+                <div class="form-group flex-row">
+                    <label class="toggle-switch"><input type="checkbox" id="intra_autosq" onchange="saveState()"><span class="slider"></span></label>
+                    <span style="font-size:0.9rem;">Auto Square-off (₹59)</span>
+                </div>
+            </div>
+        </div>
+        <button class="btn-calc" onclick="calcIntraday()">Calculate P&L</button>
+
+        <div id="intra-result" class="results-area">
+            <div class="card-grid">
+                <div class="card profit">
+                    <div class="val-sub">Profit</div>
+                    <div class="val-big" id="res_intra_profit">₹0</div>
+                </div>
+                <div class="card loss">
+                    <div class="val-sub">Loss</div>
+                    <div class="val-big" id="res_intra_loss">₹0</div>
+                </div>
+                <div class="card neutral">
+                    <div class="val-sub">Risk : Reward</div>
+                    <div class="val-big" id="res_intra_rr">1:2</div>
+                </div>
+            </div>
+            <table class="breakdown-table">
+                <tr class="row-highlight"><td>Total Charges</td><td class="text-right text-danger" id="intra_total_charges">₹0</td></tr>
+                <tr><td>Breakeven Move</td><td class="text-right" style="color:var(--primary)" id="intra_be">0.00 pts</td></tr>
+                <tr><td>Quantity</td><td class="text-right" id="intra_qty_disp">0</td></tr>
+                <tr><td>Brokerage</td><td class="text-right text-danger" id="intra_brok">₹0</td></tr>
+            </table>
+            
+            <div class="action-btns">
+                <button class="action-btn-secondary" onclick="copySummary('intraday')">📋 Copy Analysis</button>
+                <button class="action-btn-secondary" onclick="window.print()">🖨️ Print PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 1.5: INTRADAY DETAILS (New Tab) -->
+    <div id="tab-intraday-details" class="tab-content">
+        <div class="mode-tabs">
+            <div class="mode-tab active" id="det_tabCapital" onclick="det_setMode('capital')">💰 Capital Mode<br><span style="font-size:0.7em; font-weight:normal">I have ₹X, how much can I buy?</span></div>
+            <div class="mode-tab" id="det_tabRisk" onclick="det_setMode('risk')">🛡️ Risk Manager<br><span style="font-size:0.7em; font-weight:normal">I want to lose max ₹X, what should I buy?</span></div>
+        </div>
+
+        <div class="grid">
+            <!-- Left Column -->
+            <div>
+                <div class="form-group">
+                    <label>Trade Direction</label>
+                    <div class="radio-group">
+                        <input type="radio" id="det_dirLong" name="det_direction" value="LONG" checked onchange="det_updateLabels()">
+                        <label for="det_dirLong">Buy (Long)</label>
+                        <input type="radio" id="det_dirShort" name="det_direction" value="SHORT" onchange="det_updateLabels()">
+                        <label for="det_dirShort">Sell (Short)</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Broker</label>
+                    <select id="det_broker" onchange="det_saveSettings()">
+                        <option value="zerodha">Zerodha (0.03% or ₹20)</option>
+                        <option value="groww">Groww (0.05% or ₹20)</option>
+                        <option value="dhan">Dhan (0.03% or ₹20)</option>
+                    </select>
+                </div>
+                
+                <div class="grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 0; gap:10px;">
+                    <div class="form-group">
+                        <label>Exchange</label>
+                        <select id="det_exchange" onchange="det_saveSettings()">
+                            <option value="NSE">NSE</option>
+                            <option value="BSE">BSE</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Leverage</label>
+                        <select id="det_leverage" onchange="det_saveSettings()">
+                            <option value="1">1x</option>
+                            <option value="3">3x</option>
+                            <option value="5" selected>5x (Std)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Capital Input (Visible in Capital Mode) -->
+                <div class="form-group" id="det_capitalGroup">
+                    <label>Available Capital (₹)</label>
+                    <input type="number" id="det_capital" value="10000" min="500" onchange="det_saveSettings()">
+                    <span class="hint">Total funds in your account</span>
+                </div>
+
+                <!-- Risk Input (Visible in Risk Mode) -->
+                <div class="form-group" id="det_riskGroup" style="display:none;">
+                    <label style="color:var(--warning)">Max Willing Risk (₹)</label>
+                    <input type="number" id="det_maxRisk" value="500" min="100" class="risk-input">
+                    <span class="hint">Maximum loss you can tolerate on this trade</span>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+                <div class="form-group">
+                    <label>Entry Price (₹)</label>
+                    <div class="input-group">
+                        <button class="tick-btn" onclick="tick('det_entryPrice', -0.05)">-</button>
+                        <input type="number" id="det_entryPrice" value="500" step="0.05">
+                        <button class="tick-btn" onclick="tick('det_entryPrice', 0.05)">+</button>
+                    </div>
+                </div>
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 0;">
+                    <div class="form-group">
+                        <label id="det_targetLabel">Target (%)</label>
+                        <div class="input-group">
+                            <button class="tick-btn" onclick="tick('det_targetPercent', -0.1)">-</button>
+                            <input type="number" id="det_targetPercent" value="2.0" step="0.1">
+                            <button class="tick-btn" onclick="tick('det_targetPercent', 0.1)">+</button>
+                        </div>
+                        <div class="presets">
+                            <button class="preset-btn" onclick="det_setPreset('det_targetPercent', 0.5)">0.5%</button>
+                            <button class="preset-btn" onclick="det_setPreset('det_targetPercent', 1.0)">1%</button>
+                            <button class="preset-btn" onclick="det_setPreset('det_targetPercent', 2.0)">2%</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label id="det_slLabel">Stop Loss (%)</label>
+                         <div class="input-group">
+                            <button class="tick-btn" onclick="tick('det_stopLossPercent', -0.1)">-</button>
+                            <input type="number" id="det_stopLossPercent" value="1.0" step="0.1" style="border-color: #fca5a5;">
+                            <button class="tick-btn" onclick="tick('det_stopLossPercent', 0.1)">+</button>
+                        </div>
+                        <div class="presets">
+                            <button class="preset-btn" onclick="det_setPreset('det_stopLossPercent', 0.5)">0.5%</button>
+                            <button class="preset-btn" onclick="det_setPreset('det_stopLossPercent', 1.0)">1%</button>
+                            <button class="preset-btn" onclick="det_setPreset('det_stopLossPercent', 2.0)">2%</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="toggle-group">
+                    <input type="checkbox" id="det_autoSquareOff" style="width: auto; margin: 0;">
+                    <label for="det_autoSquareOff" style="margin: 0; font-weight: 500; cursor: pointer;">
+                        Auto Square-off? (₹50+GST)
+                    </label>
+                </div>
+
+                <div id="det_calcInfoBox" style="background:#f8fafc; border:1px dashed #cbd5e1; padding:10px; border-radius:6px; font-size:0.85rem; color:#64748b; margin-top:10px;">
+                    Mode: Capital Based. Maximizing Quantity.
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-calc" onclick="det_calculateTrades()">Calculate Details</button>
+
+        <div id="det_results" class="results-container">
+            <div class="summary-grid">
+                <div class="card profit">
+                    <div class="card-title">Profit Target</div>
+                    <div class="card-value" id="det_netProfit">₹0.00</div>
+                    <div class="card-sub" id="det_profitROI">ROI: 0%</div>
+                    <div style="margin-top:10px; font-size:0.85rem; opacity:0.8;">
+                        Exit @ <span id="det_targetExitPrice" style="font-weight:700">₹0</span>
+                    </div>
+                </div>
+
+                <div class="card loss">
+                    <div class="card-title">Stop Loss</div>
+                    <div class="card-value" id="det_netLoss">₹0.00</div>
+                    <div class="card-sub" id="det_lossROI">ROI: 0%</div>
+                    <div style="margin-top:10px; font-size:0.85rem; opacity:0.8;">
+                        Exit @ <span id="det_slExitPrice" style="font-weight:700">₹0</span>
+                    </div>
+                </div>
+
+                <div class="card rr">
+                    <div class="card-title">Risk Analysis</div>
+                    <div class="badge" id="det_rrBadge">--</div>
+                    <div style="margin-top: 15px;">
+                        <div class="card-sub">Risk : Reward</div>
+                        <div class="card-value" id="det_rrRatio" style="font-size: 1.5rem;">1 : 0</div>
+                    </div>
+                    <div style="margin-top: 5px; font-size: 0.9rem;" id="det_rrAdvice">
+                        Loading...
+                    </div>
+                </div>
+
+                <div class="card neutral">
+                    <div class="card-title">Break-Even</div>
+                    <div style="margin-top: 15px;">
+                        <div class="card-sub">Points to Recover</div>
+                        <div class="card-value" id="det_pointsToRecover" style="font-size: 1.5rem;">0.00</div>
+                    </div>
+                    <div style="margin-top: 5px; font-size: 0.9rem;">
+                        Close above <strong id="det_breakEvenPrice">₹0</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="details-section">
+                <div class="details-header">
+                    <span>Trade Breakdown</span>
+                    <span>Quantity: <span id="det_qtyDisplay" style="color:var(--primary); font-size:1.1em;">0</span></span>
+                </div>
+                <div id="det_capitalWarning" style="display:none; background:#fffbeb; padding:10px 20px; font-size:0.85rem; color:#b45309; border-bottom:1px solid var(--border);">
+                    ⚠️ Quantity reduced to match available capital.
+                </div>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>Margin Used / Required</td>
+                            <td class="text-right" id="det_marginUsed">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>Turnover</td>
+                            <td class="text-right" id="det_turnover">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Brokerage</strong> <span class="hint" id="det_brokerageRule"></span></td>
+                            <td class="text-right text-danger" id="det_brokerageFee">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td>Total Taxes & Charges</td>
+                            <td class="text-right text-bold text-danger" id="det_totalCharges">₹0.00</td>
+                        </tr>
+                        <tr>
+                            <td class="text-bold">Gross Profit</td>
+                            <td class="text-right text-bold" style="color:var(--primary)" id="det_grossProfit">₹0.00</td>
+                        </tr>
+                        <tr style="background-color: var(--success-bg);">
+                            <td class="text-bold" style="color:var(--success-dark)">NET REALIZED PROFIT</td>
+                            <td class="text-right text-bold" style="font-size:1.2rem; color:var(--success-dark)" id="det_finalNet">₹0.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="padding:10px; text-align:center; font-size:0.8rem; color:#64748b; background:#f8fafc; cursor:pointer;" onclick="det_toggleDetails()">
+                    Show Full Tax Breakdown ▼
+                </div>
+                <div id="det_fullTaxDetails" style="display:none; border-top:1px solid #e2e8f0;">
+                    <table>
+                        <tr><td>STT</td><td class="text-right" id="det_sttFee">0</td></tr>
+                        <tr><td>Exchange Txn</td><td class="text-right" id="det_exchangeFee">0</td></tr>
+                        <tr><td>SEBI + IPFT</td><td class="text-right" id="det_sebiFee">0</td></tr>
+                        <tr><td>Stamp Duty</td><td class="text-right" id="det_stampFee">0</td></tr>
+                        <tr><td>GST</td><td class="text-right" id="det_gstFee">0</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: OPTIONS TRADING -->
+    <div id="tab-options" class="tab-content">
+        <div class="section-header">
+            <h2 class="section-title">Options (F&O)</h2>
+            <span class="badge badge-pro">Risk Manager</span>
+        </div>
+        
+        <div class="grid">
+            <div>
+                 <div class="pro-input-container">
+                    <span class="pro-label">🛡️ POSITION SIZING (RISK MANAGER)</span>
+                    <label>Max Loss Willing to take (₹)</label>
+                    <div class="input-group">
+                        <input type="number" id="opt_max_risk" placeholder="e.g. 2000" onchange="saveState()">
+                        <button onclick="calcSafeQty()" style="background:var(--primary); color:white; border:none; padding:0 15px; cursor:pointer; font-weight:600;">Find Qty</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Buy Premium (₹)</label>
+                    <div class="input-group">
+                        <div class="tick-btn" onclick="tick('opt_buy', -1)">-</div>
+                        <input type="number" id="opt_buy" value="100">
+                        <div class="tick-btn" onclick="tick('opt_buy', 1)">+</div>
+                    </div>
+                </div>
+                
+                 <div class="form-group">
+                    <label style="display:flex; justify-content:space-between;">
+                        Stop Loss
+                        <span class="mode-toggle-text" onclick="toggleInputMode('opt_sl_mode')">Toggle: <span id="opt_sl_mode_text">Price</span></span>
+                    </label>
+                    <div class="input-group">
+                        <div class="tick-btn" onclick="tick('opt_sl', -1)">-</div>
+                        <input type="number" id="opt_sl" value="90" style="color:var(--danger); font-weight:600;">
+                        <div class="tick-btn" onclick="tick('opt_sl', 1)">+</div>
+                    </div>
+                    <input type="hidden" id="opt_sl_mode" value="PRICE">
+                </div>
+            </div>
+            <div>
+                 <div class="form-group">
+                    <label style="display:flex; justify-content:space-between;">
+                        Target
+                        <span class="mode-toggle-text" onclick="toggleInputMode('opt_target_mode')">Toggle: <span id="opt_target_mode_text">Price</span></span>
+                    </label>
+                    <div class="input-group">
+                        <div class="tick-btn" onclick="tick('opt_target', -1)">-</div>
+                        <input type="number" id="opt_target" value="120" style="color:var(--success); font-weight:600;">
+                        <div class="tick-btn" onclick="tick('opt_target', 1)">+</div>
+                    </div>
+                     <input type="hidden" id="opt_target_mode" value="PRICE">
+                </div>
+
+                <div class="form-group">
+                    <label>Quantity (Total Units)</label>
+                    <div class="input-group">
+                        <div class="tick-btn" onclick="tick('opt_qty', -10)">-</div>
+                        <input type="number" id="opt_qty" value="75" placeholder="Total Qty" onchange="saveState()">
+                        <div class="tick-btn" onclick="tick('opt_qty', 10)">+</div>
+                    </div>
+                    <div class="helper-chips">
+                        <span class="chip" onclick="addQty(75)">+Nifty(75)</span>
+                        <span class="chip" onclick="addQty(30)">+Bank(30)</span>
+                        <span class="chip" onclick="document.getElementById('opt_qty').value=0">Reset</span>
+                    </div>
+                </div>
+                
+                 <div class="form-group flex-row" style="margin-top:28px">
+                    <label class="toggle-switch"><input type="checkbox" id="opt_autosq" onchange="saveState()"><span class="slider"></span></label>
+                    <span style="font-size:0.9rem;">Auto Sq (₹59)</span>
+                </div>
+            </div>
+        </div>
+        <button class="btn-calc" onclick="calcOptions()">Analyze Risk & Reward</button>
+
+        <div id="opt-result" class="results-area">
+             <div class="card-grid">
+                <div class="card profit">
+                    <div class="val-sub">Target Profit</div>
+                    <div class="val-big" id="res_opt_profit">₹0</div>
+                </div>
+                <div class="card loss">
+                    <div class="val-sub">Stop Loss Loss</div>
+                    <div class="val-big" id="res_opt_loss">₹0</div>
+                </div>
+                 <div class="card neutral">
+                    <div class="val-sub">Risk : Reward</div>
+                    <div class="val-big" id="res_opt_rr">1:1</div>
+                </div>
+            </div>
+            
+            <table class="breakdown-table">
+                <tr class="row-highlight"><td>Total Charges (One Way)</td><td class="text-right text-danger" id="opt_total_charges">₹0</td></tr>
+                <tr><td>Points to Breakeven</td><td class="text-right" style="color:var(--primary)" id="opt_be">0.00 pts</td></tr>
+                <tr><td>Brokerage</td><td class="text-right text-danger" id="opt_brok">₹40.00</td></tr>
+                <tr><td>STT (0.1% on Sell)</td><td class="text-right text-danger" id="opt_stt">₹0</td></tr>
+            </table>
+            
+            <div class="action-btns">
+                <button class="action-btn-secondary" onclick="copySummary('options')">📋 Copy Analysis</button>
+                <button class="action-btn-secondary" onclick="window.print()">🖨️ Print PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: MUTUAL FUNDS -->
+    <div id="tab-mutualfunds" class="tab-content">
+        <div class="section-header">
+            <h2 class="section-title">Mutual Funds</h2>
+            <div style="display:flex; gap:10px;">
+                <span class="badge badge-pro" id="mf_mode_badge">Wealth Builder</span>
+            </div>
+        </div>
+        
+        <div class="grid">
+            <div>
+                 <div class="form-group">
+                    <label>Calculator Mode</label>
+                    <div class="radio-group">
+                        <input type="radio" name="mf_mode" id="mf_mode_return" value="RETURN" checked onchange="toggleMFMode()"><label for="mf_mode_return">I have Money</label>
+                        <input type="radio" name="mf_mode" id="mf_mode_goal" value="GOAL" onchange="toggleMFMode()"><label for="mf_mode_goal">I have a Goal</label>
+                    </div>
+                </div>
+
+                 <div class="form-group" id="grp_mf_amt">
+                    <label id="lbl_mf_amt">Monthly SIP Amount (₹)</label>
+                    <input type="number" id="mf_amt" value="5000" onchange="saveState()">
+                </div>
+                
+                 <div class="form-group" id="grp_mf_target" style="display:none;">
+                    <label>Target Amount (Goal) (₹)</label>
+                    <input type="number" id="mf_target_amt" value="10000000" placeholder="e.g. 1 Cr" onchange="saveState()">
+                </div>
+                
+                 <div class="form-group" id="grp_stepup">
+                    <label>Annual Step-up (%) <span style="font-weight:400; font-size:0.8em; color:var(--text-light)">(Yearly increase)</span></label>
+                    <div class="input-group">
+                        <div class="tick-btn" onclick="tick('mf_stepup', -1)">-</div>
+                        <input type="number" id="mf_stepup" value="10" onchange="saveState()">
+                        <div class="tick-btn" onclick="tick('mf_stepup', 1)">+</div>
+                    </div>
+                </div>
+                
+                <div class="pro-input-container">
+                    <span class="pro-label">📉 EXPENSE RATIO (FEE IMPACT)</span>
+                    <label>Fund Expense Ratio (%)</label>
+                    <div class="input-group">
+                        <div class="tick-btn" onclick="tick('mf_expense', -0.1)">-</div>
+                        <input type="number" id="mf_expense" value="0.5" placeholder="e.g. 1.0" onchange="saveState()">
+                        <div class="tick-btn" onclick="tick('mf_expense', 0.1)">+</div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                 <div class="form-group" id="grp_mf_type">
+                    <label>Investment Type</label>
+                    <div class="radio-group">
+                        <input type="radio" name="mf_type" id="mf_sip" value="SIP" checked onchange="toggleMFInputs()"><label for="mf_sip">SIP</label>
+                        <input type="radio" name="mf_type" id="mf_lump" value="LUMP" onchange="toggleMFInputs()"><label for="mf_lump">Lumpsum</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Expected Return (% p.a)</label>
+                    <div class="input-group">
+                        <div class="tick-btn" onclick="tick('mf_rate', -0.5)">-</div>
+                        <input type="number" id="mf_rate" value="12" onchange="saveState()">
+                        <div class="tick-btn" onclick="tick('mf_rate', 0.5)">+</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Time Period (Years)</label>
+                    <div class="input-group">
+                         <div class="tick-btn" onclick="tick('mf_years', -1)">-</div>
+                        <input type="number" id="mf_years" value="15" onchange="saveState()">
+                         <div class="tick-btn" onclick="tick('mf_years', 1)">+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+         <div style="display:flex; gap:20px; align-items:center; margin-top:10px; flex-wrap:wrap;">
+            <div class="form-group flex-row">
+                <label class="toggle-switch"><input type="checkbox" id="mf_tax" checked onchange="saveState()"><span class="slider"></span></label>
+                <span style="font-size:0.9rem;">Deduct Taxes (LTCG 12.5% / STCG 20%)</span>
+            </div>
+             <div class="form-group">
+                <select id="mf_broker" style="padding:8px; width:auto;" onchange="saveState()">
+                    <option value="groww">Groww (AMC ₹0)</option>
+                    <option value="zerodha">Zerodha (AMC ₹300/yr)</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="btn-calc" onclick="calcMF()">Calculate</button>
+
+        <div id="mf-result" class="results-area">
+             <div class="card-grid">
+                 <div class="card neutral" id="card_mf_inv">
+                    <div class="val-sub" id="lbl_mf_res_1">Total Invested</div>
+                    <div class="val-big" id="res_mf_inv">₹0</div>
+                </div>
+                 <div class="card profit">
+                    <div class="val-sub" id="lbl_mf_res_2">Final Value</div>
+                    <div class="val-big" id="res_mf_val">₹0</div>
+                </div>
+                 <div class="card">
+                    <div class="val-sub">Real Value (Inflation)</div>
+                    <div class="val-big" id="res_mf_real" style="color:var(--text-light)">₹0</div>
+                </div>
+            </div>
+            
+            <table class="breakdown-table">
+                <tr><td>Gross Maturity Amount (Pre-Tax)</td><td class="text-right" id="mf_gross">₹0</td></tr>
+                 <tr style="background:var(--danger-light); color:var(--danger); font-weight:600;">
+                    <td>Wealth Lost to Fees (Expense Ratio)</td>
+                    <td class="text-right" id="mf_fees_lost">₹0</td>
+                </tr>
+                <tr><td>Total Profit (Gains)</td><td class="text-right" style="color:var(--success)" id="mf_profit">₹0</td></tr>
+                <tr class="row-highlight"><td>Estimated Tax (LTCG/STCG)</td><td class="text-right text-danger" id="mf_tax_val">₹0</td></tr>
+            </table>
+             <button class="action-btn-secondary" onclick="window.print()" style="width:100%; margin-top:15px;">🖨️ Print / Save PDF</button>
+        </div>
+    </div>
+    
+    <!-- TAB 4: TOOLS -->
+    <div id="tab-tools" class="tab-content">
+        <div class="section-header">
+            <h2 class="section-title">Trader Utilities</h2>
+        </div>
+        
+        <!-- Stock Average Calculator -->
+        <div class="pro-input-container" style="background:var(--bg); border:1px solid var(--border);">
+            <span class="pro-label" style="font-size:1.1rem; border-bottom:1px solid var(--border); padding-bottom:5px; margin-bottom:15px;">📊 Stock Average Calculator</span>
+            <div class="grid">
+                <div>
+                    <label>First Buy</label>
+                    <div style="display:flex; gap:10px;">
+                        <input type="number" id="avg_q1" placeholder="Qty 1">
+                        <input type="number" id="avg_p1" placeholder="Price 1">
+                    </div>
+                </div>
+                <div>
+                    <label>Second Buy</label>
+                    <div style="display:flex; gap:10px;">
+                        <input type="number" id="avg_q2" placeholder="Qty 2">
+                        <input type="number" id="avg_p2" placeholder="Price 2">
+                    </div>
+                </div>
+            </div>
+            <button class="btn-calc" onclick="calcAverage()" style="margin-top:15px; padding:10px;">Calculate Average</button>
+            <div id="avg_result" style="margin-top:15px; font-weight:bold; font-size:1.1rem; color:var(--primary); text-align:center; display:none;">
+                New Average: <span id="res_avg_price">₹0</span> (Total Qty: <span id="res_avg_qty">0</span>)
+            </div>
+        </div>
+        
+        <!-- Pivot Point Calculator -->
+        <div class="pro-input-container" style="background:var(--bg); border:1px solid var(--border);">
+            <span class="pro-label" style="font-size:1.1rem; border-bottom:1px solid var(--border); padding-bottom:5px; margin-bottom:15px;">📐 Pivot Point Calculator (Standard)</span>
+            <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
+                <input type="number" id="pp_high" placeholder="High">
+                <input type="number" id="pp_low" placeholder="Low">
+                <input type="number" id="pp_close" placeholder="Close">
+            </div>
+            <button class="btn-calc" onclick="calcPivot()" style="margin-top:15px; padding:10px;">Generate Levels</button>
+            
+            <table class="breakdown-table" id="pp_table" style="margin-top:20px; display:none;">
+                <tr><td>R2</td><td class="text-right" id="res_r2">0</td></tr>
+                <tr><td>R1</td><td class="text-right" id="res_r1">0</td></tr>
+                <tr style="background:#f0f9ff; font-weight:bold;"><td>Pivot (PP)</td><td class="text-right" id="res_pp">0</td></tr>
+                <tr><td>S1</td><td class="text-right" id="res_s1">0</td></tr>
+                <tr><td>S2</td><td class="text-right" id="res_s2">0</td></tr>
+            </table>
+        </div>
+        
+        <!-- Fibonacci Calculator -->
+        <div class="pro-input-container" style="background:var(--bg); border:1px solid var(--border);">
+            <span class="pro-label" style="font-size:1.1rem; border-bottom:1px solid var(--border); padding-bottom:5px; margin-bottom:15px;">🌀 Fibonacci Retracement</span>
+            <div class="grid">
+                <div>
+                    <label>Trend Start (Low/High)</label>
+                    <input type="number" id="fib_start" placeholder="e.g. 100">
+                </div>
+                <div>
+                    <label>Trend End (High/Low)</label>
+                    <input type="number" id="fib_end" placeholder="e.g. 200">
+                </div>
+            </div>
+            <button class="btn-calc" onclick="calcFib()" style="margin-top:15px; padding:10px;">Find Levels</button>
+            
+            <table class="breakdown-table" id="fib_table" style="margin-top:20px; display:none;">
+                <tr><td>23.6%</td><td class="text-right" id="res_fib_236">0</td></tr>
+                <tr><td>38.2%</td><td class="text-right" id="res_fib_382">0</td></tr>
+                <tr style="background:#f0f9ff; font-weight:bold;"><td>50% (Golden Zone)</td><td class="text-right" id="res_fib_500">0</td></tr>
+                <tr><td>61.8%</td><td class="text-right" id="res_fib_618">0</td></tr>
+                <tr><td>78.6%</td><td class="text-right" id="res_fib_786">0</td></tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast">Settings Saved</div>
+<textarea id="clipboard_target" style="position:absolute; left:-9999px;"></textarea>
+
+<script>
+    /* --- UTILITIES & STATE MANAGEMENT --- */
+    const fmt = (num) => "₹" + num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    
+    // Auto-Save Elements (Including new details tab inputs)
+    const STATE_KEYS = [
+        'intra_broker', 'intra_capital', 'intra_leverage', 'intra_autosq',
+        'det_broker', 'det_capital', 'det_leverage', 'det_autoSquareOff', 'det_maxRisk',
+        'opt_max_risk', 'opt_qty', 'opt_autosq',
+        'mf_amt', 'mf_target_amt', 'mf_stepup', 'mf_expense', 'mf_rate', 'mf_years', 'mf_broker', 'mf_tax'
+    ];
+
+    window.onload = function() {
+        // Load Theme
+        if(localStorage.getItem('ft_theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('theme-icon').innerText = '☀️';
+        }
+        
+        // Load Inputs
+        STATE_KEYS.forEach(key => {
+            const val = localStorage.getItem('ft_' + key);
+            if(val !== null) {
+                const el = document.getElementById(key);
+                if(el) { // Check if element exists before setting
+                    if(el.type === 'checkbox') el.checked = (val === 'true');
+                    else el.value = val;
+                }
+            }
+        });
+        
+        // Load Details Tab specific broker (since it uses 'ic_' prefix in provided code's logic, we adapt)
+        // But here we use 'ft_' for consistency in main app.
+    };
+
+    function saveState() {
+        STATE_KEYS.forEach(key => {
+            const el = document.getElementById(key);
+            if(el) {
+                const val = el.type === 'checkbox' ? el.checked : el.value;
+                localStorage.setItem('ft_' + key, val);
+            }
+        });
+        showToast();
+    }
+    
+    function showToast() {
+        const t = document.getElementById('toast');
+        t.innerText = "Settings Saved";
+        t.style.opacity = '1';
+        setTimeout(() => t.style.opacity = '0', 2000);
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        document.getElementById('theme-icon').innerText = isDark ? '☀️' : '🌙';
+        localStorage.setItem('ft_theme', isDark ? 'dark' : 'light');
+    }
+
+    function tick(id, delta) {
+        const el = document.getElementById(id);
+        let val = parseFloat(el.value) || 0;
+        val += delta;
+        val = Math.round(val * 100) / 100;
+        if(val < 0) val = 0;
+        el.value = val;
+    }
+
+    function addQty(amount) {
+        const el = document.getElementById('opt_qty');
+        let val = parseFloat(el.value) || 0;
+        el.value = val + amount;
+        saveState();
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+        
+        // Simple active button logic (index based)
+        const tabs = ['intraday', 'intraday-details', 'options', 'mutualfunds', 'tools'];
+        const idx = tabs.indexOf(tabId);
+        if(idx >= 0) document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+    }
+
+    function toggleInputMode(id) {
+        const el = document.getElementById(id);
+        const text = document.getElementById(id + '_text');
+        if(el.value === 'PRICE') { // For Options
+             el.value = 'POINTS';
+             text.innerText = 'Points';
+        } else if (el.value === 'POINTS') { // For Options
+             el.value = 'PRICE';
+             text.innerText = 'Price';
+        } else if (el.value === 'PERCENT') { // For Intraday
+             el.value = 'POINTS';
+             text.innerText = 'Pts';
+        } else if (el.value === 'POINTS') { // For Intraday (Cycle back)
+             el.value = 'PERCENT';
+             text.innerText = '%';
+        }
+    }
+    
+    function copySummary(type) {
+        let text = "";
+        if(type === 'intraday') {
+            text = `📊 *Intraday Trade Analysis*\n`;
+            text += `Entry: ₹${document.getElementById('intra_entry').value}\n`;
+            text += `Target: ₹${((parseFloat(document.getElementById('intra_entry').value) * (1 + parseFloat(document.getElementById('intra_target').value)/100))).toFixed(2)}\n`;
+            text += `Stop Loss: ₹${((parseFloat(document.getElementById('intra_entry').value) * (1 - parseFloat(document.getElementById('intra_sl').value)/100))).toFixed(2)}\n`;
+            text += `Qty: ${document.getElementById('intra_qty_disp').innerText}\n`;
+            text += `✅ Profit: ${document.getElementById('res_intra_profit').innerText}\n`;
+            text += `❌ Loss: ${document.getElementById('res_intra_loss').innerText}\n`;
+            text += `⚖️ RRR: ${document.getElementById('res_intra_rr').innerText}\n`;
+        } else if (type === 'options') {
+            text = `📊 *Options Analysis*\n`;
+            text += `Buy: ₹${document.getElementById('opt_buy').value} | Qty: ${document.getElementById('opt_qty').value}\n`;
+            text += `Target: ₹${document.getElementById('opt_target').value} | SL: ₹${document.getElementById('opt_sl').value}\n`;
+            text += `✅ Potential: ${document.getElementById('res_opt_profit').innerText}\n`;
+            text += `❌ Risk: ${document.getElementById('res_opt_loss').innerText}\n`;
+            text += `⚖️ RRR: ${document.getElementById('res_opt_rr').innerText}`;
+        }
+        
+        // Robust copy using hidden textarea
+        const el = document.getElementById('clipboard_target');
+        el.value = text;
+        el.select();
+        document.execCommand('copy');
+        
+        const t = document.getElementById('toast');
+        t.innerText = "Summary Copied! ✅";
+        t.style.opacity = '1';
+        setTimeout(() => t.style.opacity = '0', 2000);
+    }
+
+    /* --- NEW INTRADAY DETAILS TAB LOGIC --- */
+    let det_currentMode = 'capital';
+
+    function det_setMode(mode) {
+        det_currentMode = mode;
+        const infoBox = document.getElementById('det_calcInfoBox');
+        
+        if (mode === 'capital') {
+            document.getElementById('det_tabCapital').classList.add('active');
+            document.getElementById('det_tabRisk').classList.remove('active');
+            document.getElementById('det_capitalGroup').style.display = 'block';
+            document.getElementById('det_riskGroup').style.display = 'none';
+            infoBox.innerHTML = "<strong>Capital Mode:</strong> Calculating maximum shares you can buy with your funds.";
+        } else {
+            document.getElementById('det_tabCapital').classList.remove('active');
+            document.getElementById('det_tabRisk').classList.add('active');
+            document.getElementById('det_capitalGroup').style.display = 'block'; 
+            document.getElementById('det_riskGroup').style.display = 'block';
+            infoBox.innerHTML = "<strong>Risk Mode:</strong> Calculating quantity so your Stop Loss hits exactly -₹" + document.getElementById('det_maxRisk').value;
+        }
+    }
+
+    function det_updateLabels() {
+        const isLong = document.querySelector('input[name="det_direction"]:checked').value === 'LONG';
+        const targetLabel = document.getElementById('det_targetLabel');
+        const slLabel = document.getElementById('det_slLabel');
+        
+        const presetHtml = (id) => `<div class='presets'><button class='preset-btn' onclick=\"det_setPreset('${id}', 0.5)\">0.5%</button><button class='preset-btn' onclick=\"det_setPreset('${id}', 1.0)\">1%</button><button class='preset-btn' onclick=\"det_setPreset('${id}', 2.0)\">2%</button></div>`;
+        
+        if (isLong) {
+            targetLabel.innerHTML = "Target Profit (Increase %)" + presetHtml('det_targetPercent');
+            slLabel.innerHTML = "Stop Loss (Drop %)" + presetHtml('det_stopLossPercent');
+        } else {
+            targetLabel.innerHTML = "Target Profit (Drop %)" + presetHtml('det_targetPercent');
+            slLabel.innerHTML = "Stop Loss (Increase %)" + presetHtml('det_stopLossPercent');
+        }
+    }
+
+    function det_setPreset(id, val) {
+        document.getElementById(id).value = val;
+    }
+
+    function det_toggleDetails() {
+        const el = document.getElementById('det_fullTaxDetails');
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function det_saveSettings() {
+        // Reuse global saveState for consistency
+        saveState();
+    }
+
+    function det_calculateTrades() {
+        // --- 1. GET INPUTS ---
+        const direction = document.querySelector('input[name="det_direction"]:checked').value;
+        const broker = document.getElementById('det_broker').value;
+        const exchange = document.getElementById('det_exchange').value;
+        const capital = parseFloat(document.getElementById('det_capital').value) || 0;
+        const leverage = parseFloat(document.getElementById('det_leverage').value);
+        const entryPrice = parseFloat(document.getElementById('det_entryPrice').value) || 0;
+        const targetPct = parseFloat(document.getElementById('det_targetPercent').value) || 0;
+        const slPct = parseFloat(document.getElementById('det_stopLossPercent').value) || 0;
+        const isAutoSquare = document.getElementById('det_autoSquareOff').checked;
+        const maxRisk = parseFloat(document.getElementById('det_maxRisk').value) || 0;
+
+        if (entryPrice <= 0) { alert("Please enter valid Stock Price."); return; }
+
+        // --- 2. DETERMINE QUANTITY ---
+        let quantity = 0;
+        let capitalLimited = false;
+
+        const checkAffordability = (qty) => {
+            const marginReq = (qty * entryPrice) / leverage;
+            if (marginReq > capital) {
+                return Math.floor((capital * leverage) / entryPrice);
+            }
+            return qty;
+        };
+
+        if (det_currentMode === 'capital') {
+            const rawQty = Math.floor((capital * leverage) / entryPrice);
+            quantity = rawQty;
+        } else {
+            // RISK MODE
+            const lossPerShare = (entryPrice * (slPct/100)); 
+            const estimatedTaxPerShare = entryPrice * 0.0006; 
+            const totalRiskPerShare = lossPerShare + estimatedTaxPerShare;
+            
+            let riskQty = Math.floor(maxRisk / totalRiskPerShare);
+            const affordableQty = checkAffordability(riskQty);
+            
+            if (affordableQty < riskQty) {
+                capitalLimited = true;
+                quantity = affordableQty;
+            } else {
+                quantity = riskQty;
+            }
+        }
+
+        if (quantity < 1) {
+            alert("Capital too low or Risk constraints too tight for even 1 share.");
+            return;
+        }
+
+        // --- 3. HELPER: CALCULATE CHARGES ---
+        function getCharges(buyPrice, sellPrice) {
+            const buyVal = quantity * buyPrice;
+            const sellVal = quantity * sellPrice;
+            const turnover = buyVal + sellVal;
+
+            let brokerage = 0;
+            let ruleText = "";
+            if (broker === 'zerodha' || broker === 'dhan') {
+                const buyB = Math.min(20, buyVal * 0.0003);
+                const sellB = Math.min(20, sellVal * 0.0003);
+                brokerage = buyB + sellB;
+                ruleText = "(0.03% or ₹20)";
+            } else {
+                const buyB = Math.min(20, buyVal * 0.0005);
+                const sellB = Math.min(20, sellVal * 0.0005);
+                brokerage = buyB + sellB;
+                ruleText = "(0.05% or ₹20)";
+            }
+
+            const stt = sellVal * 0.00025;
+            const exchRate = exchange === 'NSE' ? 0.0000297 : 0.0000375;
+            const exchCharges = turnover * exchRate;
+            const sebiRate = 0.000001; 
+            const ipftRate = exchange === 'NSE' ? 0.000001 : 0; 
+            const regulatoryCharges = turnover * (sebiRate + ipftRate);
+            const stampDuty = buyVal * 0.00003;
+            const gst = (brokerage + exchCharges) * 0.18;
+            const autoCharge = isAutoSquare ? (50 * 1.18) : 0;
+            const totalCharges = brokerage + stt + exchCharges + regulatoryCharges + stampDuty + gst + autoCharge;
+
+            return { brokerage, stt, exchCharges, regulatoryCharges, stampDuty, gst, autoCharge, totalCharges, turnover, ruleText };
+        }
+
+        // --- 4. SCENARIOS ---
+        let targetExit, slExit, grossP, netP, netL;
+        
+        if (direction === 'LONG') {
+            targetExit = entryPrice * (1 + (targetPct / 100));
+            slExit = entryPrice * (1 - (slPct / 100));
+            
+            const pDetails = getCharges(entryPrice, targetExit);
+            grossP = (targetExit - entryPrice) * quantity;
+            netP = grossP - pDetails.totalCharges;
+
+            const lDetails = getCharges(entryPrice, slExit);
+            netL = ((slExit - entryPrice) * quantity) - lDetails.totalCharges;
+        } else {
+            targetExit = entryPrice * (1 - (targetPct / 100));
+            slExit = entryPrice * (1 + (slPct / 100));
+
+            const pDetails = getCharges(targetExit, entryPrice);
+            grossP = (entryPrice - targetExit) * quantity;
+            netP = grossP - pDetails.totalCharges;
+
+            const lDetails = getCharges(slExit, entryPrice);
+            netL = ((entryPrice - slExit) * quantity) - lDetails.totalCharges;
+        }
+
+        // --- 5. RISK REWARD ---
+        const rr = Math.abs(netP) / Math.abs(netL);
+        const rrText = `1 : ${rr.toFixed(2)}`;
+        let rrBadgeClass = 'bad', rrBadgeText = 'HIGH RISK', rrAdviceText = "Risk outweighs Reward.";
+        
+        if (rr >= 1.5) {
+            rrBadgeClass = 'good'; rrBadgeText = 'GOOD SETUP'; rrAdviceText = "Good Potential.";
+        } else if (rr >= 1.0) {
+            rrBadgeClass = 'neutral'; rrBadgeText = 'OKAY'; rrAdviceText = "Balanced.";
+            document.querySelector('#det_rrBadge').style.background = '#fef9c3';
+        }
+
+        // --- 6. BREAK EVEN ---
+        let bePrice = entryPrice;
+        let step = direction === 'LONG' ? 0.05 : -0.05;
+        for(let i=0; i<200; i++) {
+            bePrice += step;
+            let d = direction === 'LONG' ? getCharges(entryPrice, bePrice) : getCharges(bePrice, entryPrice);
+            let gp = direction === 'LONG' ? (bePrice - entryPrice) * quantity : (entryPrice - bePrice) * quantity;
+            if (gp > d.totalCharges) break;
+        }
+
+        // --- 7. DISPLAY ---
+        document.getElementById('det_results').style.display = 'block';
+        document.getElementById('det_capitalWarning').style.display = capitalLimited ? 'block' : 'none';
+        
+        // Cards
+        document.getElementById('det_netProfit').innerText = fmt(netP);
+        document.getElementById('det_netProfit').style.color = netP >= 0 ? 'var(--success-dark)' : 'var(--danger)';
+        document.getElementById('det_profitROI').innerText = `ROI: ${((netP/capital)*100).toFixed(2)}%`;
+        document.getElementById('det_targetExitPrice').innerText = fmt(targetExit);
+
+        document.getElementById('det_netLoss').innerText = fmt(netL);
+        document.getElementById('det_lossROI').innerText = `ROI: ${((netL/capital)*100).toFixed(2)}%`;
+        document.getElementById('det_slExitPrice').innerText = fmt(slExit);
+
+        document.getElementById('det_rrRatio').innerText = rrText;
+        document.getElementById('det_rrAdvice').innerText = rrAdviceText;
+        const badge = document.getElementById('det_rrBadge');
+        badge.innerText = rrBadgeText;
+        badge.className = `badge ${rrBadgeClass}`;
+
+        document.getElementById('det_pointsToRecover').innerText = Math.abs(bePrice - entryPrice).toFixed(2);
+        document.getElementById('det_breakEvenPrice').innerText = fmt(bePrice);
+
+        // Table
+        const finalCalc = direction === 'LONG' ? getCharges(entryPrice, targetExit) : getCharges(targetExit, entryPrice);
+        document.getElementById('det_qtyDisplay').innerText = quantity;
+        document.getElementById('det_marginUsed').innerText = fmt((quantity * entryPrice) / leverage);
+        document.getElementById('det_turnover').innerText = fmt(finalCalc.turnover);
+        document.getElementById('det_brokerageFee').innerText = fmt(finalCalc.brokerage);
+        document.getElementById('det_brokerageRule').innerText = finalCalc.ruleText;
+        document.getElementById('det_totalCharges').innerText = fmt(finalCalc.totalCharges);
+        document.getElementById('det_grossProfit').innerText = fmt(grossP);
+        document.getElementById('det_finalNet').innerText = fmt(netP);
+
+        // Hidden Details
+        document.getElementById('det_sttFee').innerText = fmt(finalCalc.stt);
+        document.getElementById('det_exchangeFee').innerText = fmt(finalCalc.exchCharges);
+        document.getElementById('det_sebiFee').innerText = fmt(finalCalc.regulatoryCharges);
+        document.getElementById('det_stampFee').innerText = fmt(finalCalc.stampDuty);
+        document.getElementById('det_gstFee').innerText = fmt(finalCalc.gst);
+    }
+
+    /* --- INTRADAY (LEGACY) --- */
+    function calcIntraday() {
+        const broker = document.getElementById('intra_broker').value;
+        const capital = parseFloat(document.getElementById('intra_capital').value) || 0;
+        const leverage = parseFloat(document.getElementById('intra_leverage').value);
+        const entry = parseFloat(document.getElementById('intra_entry').value) || 0;
+        const isAutoSq = document.getElementById('intra_autosq').checked;
+        const dir = document.querySelector('input[name="intra_dir"]:checked').value;
+
+        // Mode Check
+        let targetVal = parseFloat(document.getElementById('intra_target').value) || 0;
+        let slVal = parseFloat(document.getElementById('intra_sl').value) || 0;
+        const targetMode = document.getElementById('intra_target_mode').value;
+        const slMode = document.getElementById('intra_sl_mode').value;
+        
+        let targetPct = targetMode === 'PERCENT' ? targetVal : (targetVal / entry * 100);
+        let slPct = slMode === 'PERCENT' ? slVal : (slVal / entry * 100);
+
+        const buyingPower = capital * leverage;
+        const qty = Math.floor(buyingPower / entry);
+
+        if(qty === 0) { alert("Insufficient capital!"); return; }
+
+        let exitT, exitL;
+        if(dir === 'LONG') {
+            exitT = entry * (1 + targetPct/100);
+            exitL = entry * (1 - slPct/100);
+        } else {
+            exitT = entry * (1 - targetPct/100);
+            exitL = entry * (1 + slPct/100);
+        }
+
+        const getCharges = (price1, price2) => {
+            const val1 = qty * price1;
+            const val2 = qty * price2;
+            const turnover = val1 + val2;
+            let brok = 0;
+            if(broker === 'zerodha') brok = Math.min(20, val1*0.0003) + Math.min(20, val2*0.0003);
+            else brok = Math.min(20, val1*0.0005) + Math.min(20, val2*0.0005);
+
+            const stt = (dir === 'LONG' ? val2 : val1) * 0.00025;
+            const exch = turnover * 0.0000325;
+            const sebi = turnover * 0.000001; 
+            const stamp = (dir === 'LONG' ? val1 : val2) * 0.00003;
+            const gst = (brok + exch + sebi) * 0.18;
+            const auto = isAutoSq ? 59 : 0;
+            return brok + stt + exch + sebi + stamp + gst + auto;
+        };
+
+        const chargesT = getCharges(entry, exitT);
+        const chargesL = getCharges(entry, exitL);
+        const grossP = Math.abs(entry - exitT) * qty;
+        const grossL = Math.abs(entry - exitL) * qty;
+        
+        const netP = grossP - chargesT;
+        const netL = -grossL - chargesL;
+        
+        const rrr = (netP / Math.abs(netL)).toFixed(1);
+
+        document.getElementById('intra-result').style.display = 'block';
+        document.getElementById('res_intra_profit').innerText = fmt(netP);
+        document.getElementById('res_intra_loss').innerText = fmt(netL);
+        document.getElementById('res_intra_rr').innerText = `1:${rrr}`;
+        document.getElementById('intra_qty_disp').innerText = qty;
+        
+        document.getElementById('intra_total_charges').innerText = fmt(chargesT);
+        document.getElementById('intra_be').innerText = (chargesT / qty).toFixed(2) + " pts";
+        
+        const buyVal = qty * entry;
+        const sellVal = qty * exitT;
+        let brok = 0;
+        if(broker === 'zerodha') brok = Math.min(20, buyVal*0.0003) + Math.min(20, sellVal*0.0003);
+        else brok = Math.min(20, buyVal*0.0005) + Math.min(20, sellVal*0.0005);
+        document.getElementById('intra_brok').innerText = fmt(brok);
+    }
+
+    /* --- OPTIONS --- */
+    function calcSafeQty() {
+        const maxRisk = parseFloat(document.getElementById('opt_max_risk').value) || 0;
+        const buy = parseFloat(document.getElementById('opt_buy').value) || 0;
+        let sl = parseFloat(document.getElementById('opt_sl').value) || 0;
+        const slMode = document.getElementById('opt_sl_mode').value;
+        
+        if(slMode === 'POINTS') sl = buy - sl; 
+
+        if (maxRisk <= 0 || buy <= 0 || sl <= 0 || sl >= buy) {
+            alert("Check inputs: SL must be lower than Buy Price."); return;
+        }
+        
+        const lossPerUnit = buy - sl;
+        const lossWithCharges = lossPerUnit + 0.6; 
+        const safeQty = Math.floor(maxRisk / lossWithCharges);
+        document.getElementById('opt_qty').value = safeQty;
+        saveState();
+    }
+
+    function calcOptions() {
+        const buyP = parseFloat(document.getElementById('opt_buy').value) || 0;
+        const qty = parseFloat(document.getElementById('opt_qty').value) || 0;
+        const isAuto = document.getElementById('opt_autosq').checked;
+        
+        let targetP = parseFloat(document.getElementById('opt_target').value) || 0;
+        if(document.getElementById('opt_target_mode').value === 'POINTS') targetP = buyP + targetP;
+        
+        let slP = parseFloat(document.getElementById('opt_sl').value) || 0;
+        if(document.getElementById('opt_sl_mode').value === 'POINTS') slP = buyP - slP;
+
+        if(qty === 0) return;
+
+        const calcCharges = (sellPrice) => {
+            const buyVal = buyP * qty;
+            const sellVal = sellPrice * qty;
+            const turnover = buyVal + sellVal;
+            const brokerage = 40; 
+            const stt = sellVal * 0.001; 
+            const exch = turnover * 0.00053; 
+            const stamp = buyVal * 0.00003;
+            const sebi = turnover * 0.000001;
+            const gst = (brokerage + exch + sebi) * 0.18;
+            const auto = isAuto ? 59 : 0;
+            return { total: brokerage + stt + exch + stamp + sebi + gst + auto, brok: brokerage, stt: stt };
+        };
+
+        const cTarget = calcCharges(targetP);
+        const grossP = (targetP - buyP) * qty;
+        const netP = grossP - cTarget.total;
+
+        const cSL = calcCharges(slP);
+        const grossL = (slP - buyP) * qty; 
+        const netL = grossL - cSL.total;
+
+        const rr = (Math.abs(netP) / Math.abs(netL)).toFixed(1);
+
+        document.getElementById('opt-result').style.display = 'block';
+        document.getElementById('res_opt_profit').innerText = fmt(netP);
+        document.getElementById('res_opt_loss').innerText = fmt(netL);
+        document.getElementById('res_opt_rr').innerText = `1:${rr}`;
+
+        document.getElementById('opt_total_charges').innerText = fmt(cTarget.total);
+        document.getElementById('opt_be').innerText = (cTarget.total / qty).toFixed(2) + " pts";
+        document.getElementById('opt_brok').innerText = fmt(cTarget.brok);
+        document.getElementById('opt_stt').innerText = fmt(cTarget.stt);
+    }
+
+    /* --- MUTUAL FUNDS --- */
+    function calcMF() {
+        const mode = document.querySelector('input[name="mf_mode"]:checked').value;
+        const rate = parseFloat(document.getElementById('mf_rate').value) || 0;
+        const expense = parseFloat(document.getElementById('mf_expense').value) || 0;
+        const years = parseFloat(document.getElementById('mf_years').value) || 0;
+        const broker = document.getElementById('mf_broker').value;
+        const applyTax = document.getElementById('mf_tax').checked;
+
+        if(mode === 'GOAL') {
+            const target = parseFloat(document.getElementById('mf_target_amt').value) || 0;
+            const effRate = Math.max(0, rate - expense);
+            const mRate = effRate / 12 / 100;
+            const months = years * 12;
+            const factor = ( (Math.pow(1 + mRate, months) - 1) / mRate ) * (1 + mRate);
+            const reqSIP = target / factor;
+            
+            document.getElementById('mf-result').style.display = 'block';
+            document.getElementById('lbl_mf_res_1').innerText = "Required Monthly SIP";
+            document.getElementById('res_mf_inv').innerText = fmt(reqSIP);
+            document.getElementById('lbl_mf_res_2').innerText = "Target Achieved";
+            document.getElementById('res_mf_val').innerText = fmt(target);
+            
+            document.getElementById('mf_gross').parentElement.style.display = 'none';
+            document.getElementById('mf_fees_lost').parentElement.style.display = 'none';
+            return;
+        }
+
+        const type = document.querySelector('input[name="mf_type"]:checked').value;
+        const initialAmt = parseFloat(document.getElementById('mf_amt').value) || 0;
+        const stepUpPct = parseFloat(document.getElementById('mf_stepup').value) || 0;
+        
+        let invested = 0;
+        let currentVal = 0;
+        let valNoFee = 0;
+        
+        const effRate = Math.max(0, rate - expense);
+        
+        if(type === 'SIP') {
+            let monthlyAmt = initialAmt;
+            let totalMonths = years * 12;
+            let mRate = effRate / 12 / 100;
+            let mRateGross = rate / 12 / 100;
+
+            for(let m = 1; m <= totalMonths; m++) {
+                invested += monthlyAmt;
+                currentVal = (currentVal + monthlyAmt) * (1 + mRate);
+                valNoFee = (valNoFee + monthlyAmt) * (1 + mRateGross);
+                if(m % 12 === 0) monthlyAmt = monthlyAmt * (1 + stepUpPct/100);
+            }
+        } else {
+            invested = initialAmt;
+            currentVal = initialAmt * Math.pow((1 + effRate/100), years);
+            valNoFee = initialAmt * Math.pow((1 + rate/100), years);
+        }
+        
+        const wealthLost = valNoFee - currentVal;
+        const grossProfit = currentVal - invested;
+
+        const stamp = invested * 0.00005;
+        const stt = currentVal * 0.00001;
+        const amcYearly = broker === 'zerodha' ? 300 : 0;
+        const totalAMC = amcYearly * years;
+        const totalCharges = stamp + stt + totalAMC;
+
+        let tax = 0;
+        if(applyTax && grossProfit > 0) {
+            if(years < 1) tax = grossProfit * 0.20;
+            else tax = Math.max(0, grossProfit - 125000) * 0.125;
+        }
+
+        const finalValue = currentVal - totalCharges - tax;
+        const realValue = finalValue / Math.pow((1 + 0.06), years); 
+
+        document.getElementById('mf-result').style.display = 'block';
+        document.getElementById('lbl_mf_res_1').innerText = "Total Invested";
+        document.getElementById('res_mf_inv').innerText = fmt(invested);
+        document.getElementById('lbl_mf_res_2').innerText = "Final Value (Post Tax)";
+        document.getElementById('res_mf_val').innerText = fmt(finalValue);
+        document.getElementById('res_mf_real').innerText = fmt(realValue);
+        
+        document.getElementById('mf_gross').parentElement.style.display = 'table-row';
+        document.getElementById('mf_gross').innerText = fmt(currentVal);
+        document.getElementById('mf_fees_lost').parentElement.style.display = 'table-row';
+        document.getElementById('mf_fees_lost').innerText = fmt(wealthLost);
+        document.getElementById('mf_profit').innerText = fmt(grossProfit);
+        document.getElementById('mf_tax_val').innerText = fmt(tax);
+    }
+    
+    /* --- TOOLS LOGIC --- */
+    function calcAverage() {
+        const q1 = parseFloat(document.getElementById('avg_q1').value) || 0;
+        const p1 = parseFloat(document.getElementById('avg_p1').value) || 0;
+        const q2 = parseFloat(document.getElementById('avg_q2').value) || 0;
+        const p2 = parseFloat(document.getElementById('avg_p2').value) || 0;
+        
+        if(q1+q2 === 0) return;
+        const totalAmt = (q1*p1) + (q2*p2);
+        const totalQty = q1 + q2;
+        const avg = totalAmt / totalQty;
+        
+        document.getElementById('avg_result').style.display = 'block';
+        document.getElementById('res_avg_price').innerText = "₹" + avg.toFixed(2);
+        document.getElementById('res_avg_qty').innerText = totalQty;
+    }
+    
+    function calcPivot() {
+        const h = parseFloat(document.getElementById('pp_high').value) || 0;
+        const l = parseFloat(document.getElementById('pp_low').value) || 0;
+        const c = parseFloat(document.getElementById('pp_close').value) || 0;
+        
+        if(h === 0) return;
+        
+        const pp = (h + l + c) / 3;
+        const r1 = (2 * pp) - l;
+        const s1 = (2 * pp) - h;
+        const r2 = pp + (h - l);
+        const s2 = pp - (h - l);
+        
+        document.getElementById('pp_table').style.display = 'table';
+        document.getElementById('res_pp').innerText = pp.toFixed(2);
+        document.getElementById('res_r1').innerText = r1.toFixed(2);
+        document.getElementById('res_s1').innerText = s1.toFixed(2);
+        document.getElementById('res_r2').innerText = r2.toFixed(2);
+        document.getElementById('res_s2').innerText = s2.toFixed(2);
+    }
+    
+    function calcFib() {
+        const start = parseFloat(document.getElementById('fib_start').value) || 0;
+        const end = parseFloat(document.getElementById('fib_end').value) || 0;
+        const diff = end - start;
+        
+        if(start === 0) return;
+        
+        const range = Math.abs(diff);
+        const isUpTrend = end > start;
+        
+        const calcLevel = (pct) => {
+            if(isUpTrend) return end - (range * pct);
+            else return end + (range * pct);
+        };
+        
+        document.getElementById('fib_table').style.display = 'table';
+        document.getElementById('res_fib_236').innerText = calcLevel(0.236).toFixed(2);
+        document.getElementById('res_fib_382').innerText = calcLevel(0.382).toFixed(2);
+        document.getElementById('res_fib_500').innerText = calcLevel(0.500).toFixed(2);
+        document.getElementById('res_fib_618').innerText = calcLevel(0.618).toFixed(2);
+        document.getElementById('res_fib_786').innerText = calcLevel(0.786).toFixed(2);
+    }
+</script>
+
+</body>
+</html>
